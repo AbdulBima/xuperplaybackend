@@ -14,29 +14,23 @@ const createProject = async (
   try {
     const {
       projectName,
-      telegramAuth,
-      telegramAuthStatus,
-      telegramAuthCallbackUrl,
-      teamSize,
-      projectUrl,
-      telegramChatId,
+      firstName,
+      lastName,
       email,
+      buid,
+      teamSize,
+      projectUrl
     } = req.body;
-
-    // Generate a unique buid using UUID
-    const buid = uuidv4();
 
     // Create a new project object with the generated buid
     const newProject = new CompanyModel({
       projectName,
+      firstName,
+      lastName,
       buid,
-      telegramAuth,
-      telegramAuthStatus,
-      telegramAuthCallbackUrl,
+      email,
       teamSize,
       projectUrl,
-      telegramChatId,
-      email,
     });
 
     // Save the project to the database
@@ -44,7 +38,7 @@ const createProject = async (
 
     return res
       .status(201)
-      .json({ message: "Project created successfully", project: newProject });
+      .json({ message: "Project created successfully", buid, email });
   } catch (error) {
     console.error("Error creating project:", error);
     return res.status(500).json({ message: "Internal server error" });
@@ -135,8 +129,6 @@ const verifyTemporaryCompanyToken = async (
         buid: existingCompany.buid,
         projectName: existingCompany.projectName,
         email: existingCompany.email,
-
-
       });
     } else {
       // Company does not exist, create a new company
