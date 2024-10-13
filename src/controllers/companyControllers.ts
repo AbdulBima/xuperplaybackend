@@ -38,7 +38,7 @@ const createProject = async (
 
     return res
       .status(201)
-      .json({ message: "Project created successfully", buid, email });
+      .json({ message: "Project created successfully", buid, email, projectName});
   } catch (error) {
     console.error("Error creating project:", error);
     return res.status(500).json({ message: "Internal server error" });
