@@ -245,8 +245,9 @@ const resgiterWithTelegram = async (req: Request, res: Response): Promise<Respon
       // Create a temporary user with the company's buid
       const tempUser = await TemporaryCompany.create({
         buid: existingCompany.buid,
+        telegramChatId: existingCompany.telegramChatId,
         token: jwt.sign(
-          { email: existingCompany.email, buid: existingCompany.buid },
+          { telegramChatId: existingCompany.telegramChatId, buid: existingCompany.buid },
           JWT_SECRET,
           { expiresIn: "1h" }
         ),
@@ -264,7 +265,7 @@ const resgiterWithTelegram = async (req: Request, res: Response): Promise<Respon
     buid = uuidv4(); // Generate a unique buid
 
     // Create a temporary user with the generated buid
-    token = jwt.sign({ buid }, JWT_SECRET, { expiresIn: "1h" });
+    token = jwt.sign({ buid, telegramChatId: chat_id }, JWT_SECRET, { expiresIn: "1h" });
 
     const newTempUser = await TemporaryCompany.create({
       buid, // Generated new buid
@@ -275,6 +276,7 @@ const resgiterWithTelegram = async (req: Request, res: Response): Promise<Respon
     return res.status(200).json({
       message: "No company found. New temporary user created.",
       token: newTempUser.token, // Return the token
+
     });
   } catch (error) {
     console.error("Error saving chat ID:", error);
