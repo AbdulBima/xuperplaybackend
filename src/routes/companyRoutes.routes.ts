@@ -5,7 +5,7 @@ const router = express.Router();
 
 // Routes for managing projects
 router.post('/create-company', controllers.createProject); 
-router.get('/retrive/company', controllers.getCompanyByEmail); 
+router.post('/retrive/company', controllers.getCompanyByEmail); 
 router.put('/update', controllers.updateProject);
 router.delete('/del', controllers.deleteProject); 
 router.post('/auth/verify-token', controllers.verifyTemporaryCompanyToken); 
