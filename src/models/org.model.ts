@@ -15,12 +15,12 @@ interface ICompany extends Document {
 const companySchema = new Schema<ICompany>({
   projectName: { type: String, required: true },
   buid: { type: String, required: true },
-  telegramAuth: { type: String, required: true },
-  telegramAuthStatus: { type: Boolean, required: true },
-  telegramAuthCallbackUrl: { type: String, required: true },
-  teamSize: { type: Number, required: true },
+  telegramAuth: { type: String, required: false },
+  telegramAuthStatus: { type: Boolean, required: false },
+  telegramAuthCallbackUrl: { type: String, required: false },
+  teamSize: { type: Number, required: false },
   projectUrl: { type: String, required: true },
-  telegramChatId: { type: String, required: true },
+  telegramChatId: { type: String, required: false },
   email: { type: String, required: true }
 }, { timestamps: true });
 
