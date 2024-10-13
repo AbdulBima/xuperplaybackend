@@ -1,8 +1,8 @@
 
 import { Request, Response } from 'express';
-import TempComp from '../models/tempCompany.model';
 import jwt from 'jsonwebtoken';
 import { v4 as uuidv4 } from 'uuid'; 
+import TempComp from '../models/tempcomp.model';
 
 
 const JWT_SECRET = process.env.JWT_SECRET || "mistemonma"; // Replace with your actual secret key
