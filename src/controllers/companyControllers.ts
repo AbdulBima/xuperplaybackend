@@ -244,7 +244,6 @@ const resgiterWithTelegram = async (req: Request, res: Response): Promise<Respon
 
       // Create a temporary user with the company's buid
       const tempUser = await TemporaryCompany.create({
-        email: existingCompany.email,
         buid: existingCompany.buid,
         token: jwt.sign(
           { email: existingCompany.email, buid: existingCompany.buid },
