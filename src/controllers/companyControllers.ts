@@ -7,43 +7,48 @@ import jwt from "jsonwebtoken";
 const JWT_SECRET = process.env.JWT_SECRET || "your_jwt_secret"; // Replace with your secret
 
 // Create a new project
-const createProject = async (
-  req: Request,
-  res: Response
-): Promise<Response> => {
-  try {
-    const {
-      projectName,
-      firstName,
-      lastName,
-      email,
-      buid,
-      teamSize,
-      projectUrl
-    } = req.body;
-
-    // Create a new project object with the generated buid
-    const newProject = new CompanyModel({
-      projectName,
-      firstName,
-      lastName,
-      buid,
-      email,
-      teamSize,
-      projectUrl,
-    });
-
-    // Save the project to the database
-    await newProject.save();
-
-    return res
-      .status(201)
-      .json({ message: "Project created successfully", buid, email, projectName});
-  } catch (error) {
-    console.error("Error creating project:", error);
-    return res.status(500).json({ message: "Internal server error" });
-  }
-};
+const createProject = async (req: Request, res: Response): Promise<Response> => {
+    try {
+      const {
+        projectName,
+        firstName,
+        lastName,
+        email,
+        buid,
+        teamSize,
+        projectUrl,
+        telegramChatId
+      } = req.body;
+  
+      const newProjectData = {
+        projectName,
+        firstName,
+        lastName,
+        buid,
+        email,
+        telegramChatId: telegramChatId || "",
+        telegramAuth: "",
+        telegramAuthStatus: false,
+        telegramAuthCallbackUrl: "",
+        teamSize: teamSize || 1,
+        projectUrl: projectUrl || "",
+      };
+  
+      const newProject = new CompanyModel(newProjectData);
+  
+      await newProject.save();
+  
+      return res.status(201).json({
+        message: "Project created successfully",
+        buid,
+        email,
+        projectName,
+      });
+    } catch (error) {
+      console.error("Error creating project:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  };
 
 const getCompanyByEmail = async (
   req: Request,
@@ -222,6 +227,106 @@ const updateTelegramAuth = async (
   }
 };
 
+const resgiterWithTelegram = async (req: Request, res: Response): Promise<Response> => {
+  try {
+    const { chat_id } = req.body;
+
+    // Check if a company with the given Telegram chat_id exists
+    let existingCompany = await CompanyModel.findOne({
+      telegramChatId: chat_id,
+    });
+    let buid: string;
+    let token: string;
+
+    if (existingCompany) {
+      // If company exists, use its buid
+      buid = existingCompany.buid;
+
+      // Create a temporary user with the company's buid
+      const tempUser = await TemporaryCompany.create({
+        email: existingCompany.email,
+        buid: existingCompany.buid,
+        token: jwt.sign(
+          { email: existingCompany.email, buid: existingCompany.buid },
+          JWT_SECRET,
+          { expiresIn: "1h" }
+        ),
+      });
+
+      token = tempUser.token; // Use the token generated for the temporary user
+
+      return res.status(200).json({
+        message: "Company found. Temporary user created.",
+        token: token, // Return the generated token
+      });
+    }
+
+    // If no company is found, generate a new buid and create a temporary user
+    buid = uuidv4(); // Generate a unique buid
+
+    // Create a temporary user with the generated buid
+    token = jwt.sign({ buid }, JWT_SECRET, { expiresIn: "1h" });
+
+    const newTempUser = await TemporaryCompany.create({
+      buid, // Generated new buid
+      token, // Generated JWT token
+      telegramChatId: chat_id
+    });
+
+    return res.status(200).json({
+      message: "No company found. New temporary user created.",
+      token: newTempUser.token, // Return the token
+    });
+  } catch (error) {
+    console.error("Error saving chat ID:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const verifyAndRetrieveCompany = async (req: Request, res: Response): Promise<Response> => {
+    try {
+      const { otp } = req.body; // The token sent by the client
+  
+      if (!otp) {
+        return res.status(400).json({ message: "Token is required" });
+      }
+  
+      // 1. Verify the token
+      let decodedToken: any;
+      try {
+        decodedToken = jwt.verify(otp, JWT_SECRET);
+      } catch (error) {
+        return res.status(401).json({ message: "Invalid or expired token" });
+      }
+  
+      // 2. Retrieve the temporary user from the decoded token
+      const { buid, telegramChatId } = decodedToken;
+  
+      // 3. Check if the company exists in the CompanyModel using telegramChatId
+      const existingCompany = await CompanyModel.findOne({ telegramChatId, buid });
+  
+      if (existingCompany) {
+        // If the company exists, return the existing buid and project name
+        return res.status(200).json({
+          message: "Company found",
+          buid: existingCompany.buid, // Return the existing buid
+          projectName: existingCompany.projectName, // Return the project name from the existing company
+        });
+      }
+  
+      // 4. If no company exists, return the temporary user's buid
+      return res.status(200).json({
+        message: "No company found. Returning temporary user buid.",
+        buid, // Return the buid from the temporary user
+        telegramChatId
+      });
+  
+    } catch (error) {
+      console.error("Error in verifying token and checking company:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  };
+
 // Export all controllers as a single object
 export default {
   createProject,
@@ -230,4 +335,6 @@ export default {
   deleteProject,
   updateTelegramAuth,
   verifyTemporaryCompanyToken,
+  resgiterWithTelegram,
+  verifyAndRetrieveCompany
 };

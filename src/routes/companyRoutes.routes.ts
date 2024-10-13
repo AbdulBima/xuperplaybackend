@@ -11,5 +11,9 @@ router.delete('/del', controllers.deleteProject);
 router.post('/auth/verify-token', controllers.verifyTemporaryCompanyToken); 
 
 router.put('/telegram-auth', controllers.updateTelegramAuth); 
+router.post('/authtel/new/register', controllers.resgiterWithTelegram); 
+router.post('/authtel/verify-company', controllers.verifyAndRetrieveCompany); 
+
+
 
 export default router;
