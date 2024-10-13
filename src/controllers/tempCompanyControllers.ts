@@ -1,7 +1,6 @@
-// controllers/temporaryCompanyController.ts
 
 import { Request, Response } from 'express';
-import TemporaryCompany from '../models/tempCompany.model';
+import TempComp from '../models/tempCompany.model';
 import jwt from 'jsonwebtoken';
 import { v4 as uuidv4 } from 'uuid'; 
 
@@ -9,7 +8,7 @@ import { v4 as uuidv4 } from 'uuid';
 const JWT_SECRET = process.env.JWT_SECRET || "mistemonma"; // Replace with your actual secret key
 
 // Create a temporary company and set a JWT token
-export const createTemporaryCompany = async (req: Request, res: Response): Promise<Response> => {
+export const createTempComp = async (req: Request, res: Response): Promise<Response> => {
   try {
     
     const { email } = req.body;
@@ -18,7 +17,7 @@ export const createTemporaryCompany = async (req: Request, res: Response): Promi
 
 
     // Check if the company already exists
-    const existingCompany = await TemporaryCompany.findOne({ email });
+    const existingCompany = await TempComp.findOne({ email });
     if (existingCompany) {
       return res.status(400).json({ message: 'Company with this email already exists' });
     }
@@ -27,7 +26,7 @@ export const createTemporaryCompany = async (req: Request, res: Response): Promi
     const token = jwt.sign({ email, buid }, JWT_SECRET, { expiresIn: '1h' });
 
     // Create a new temporary company
-    const newCompany = new TemporaryCompany({
+    const newCompany = new TempComp({
       email,
       buid,
       token,
