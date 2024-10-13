@@ -26,7 +26,7 @@ const companySchema = new Schema<ICompany>(
     teamSize: { type: Number, default: 1 }, // Default to 1
     projectUrl: { type: String, required: false },
     telegramChatId: { type: String, default: "" }, // Default to empty string
-    email: { type: String, required: true },
+    email: { type: String, required: false},
   },
   { timestamps: true }
 );

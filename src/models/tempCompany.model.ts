@@ -7,7 +7,6 @@ const temporaryCompanySchema = new Schema(
     email: {
       type: String,
       required: false,
-      unique: true, // Ensure each email is unique
     },
     buid: {
       type: String,
