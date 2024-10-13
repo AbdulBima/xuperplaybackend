@@ -43,6 +43,7 @@ const createProject = async (req: Request, res: Response): Promise<Response> => 
         buid,
         email,
         projectName,
+        telegramChatId
       });
     } catch (error) {
       console.error("Error creating project:", error);
