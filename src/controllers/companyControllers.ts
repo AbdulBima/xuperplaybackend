@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
 import CompanyModel from "../models/org.model";
 import { v4 as uuidv4 } from "uuid"; // Import uuidv4 to generate unique IDs
-import TemporaryCompany from "../models/tempCompany.model";
 import jwt from "jsonwebtoken";
+import TempComp from "../models/tempcomp.model";
 
 const JWT_SECRET = process.env.JWT_SECRET || "your_jwt_secret"; // Replace with your secret
 
@@ -66,7 +66,7 @@ const getCompanyByEmail = async (
       const token = jwt.sign({ email, buid }, JWT_SECRET, { expiresIn: "1h" }); // Generate JWT token
 
       // Create temporary company
-      const tempCompany = await TemporaryCompany.create({
+      const tempCompany = await TempComp.create({
         email: existingCompany.email,
         buid: existingCompany.buid,
         token, // Save the generated JWT token
@@ -82,7 +82,7 @@ const getCompanyByEmail = async (
       const token = jwt.sign({ email, buid }, JWT_SECRET, { expiresIn: "1h" }); // Generate JWT token
 
       // Create a new temporary company
-      const newTempCompany = await TemporaryCompany.create({
+      const newTempCompany = await TempComp.create({
         email, // Use the email from request
         buid, // Generated buid
         token, // Generated JWT token
@@ -120,7 +120,7 @@ const verifyTemporaryCompanyToken = async (
     const { email, buid } = decoded;
 
     // Check if the temporary company exists
-    const tempCompany = await TemporaryCompany.findOne({ email, buid });
+    const tempCompany = await TempComp.findOne({ email, buid });
     if (!tempCompany) {
       return res.status(404).json({ message: "Temporary company not found." });
     }
@@ -243,7 +243,7 @@ const resgiterWithTelegram = async (req: Request, res: Response): Promise<Respon
       buid = existingCompany.buid;
 
       // Create a temporary user with the company's buid
-      const tempUser = await TemporaryCompany.create({
+      const tempUser = await TempComp.create({
         buid: existingCompany.buid,
         telegramChatId: existingCompany.telegramChatId,
         token: jwt.sign(
@@ -267,7 +267,7 @@ const resgiterWithTelegram = async (req: Request, res: Response): Promise<Respon
     // Create a temporary user with the generated buid
     token = jwt.sign({ buid, telegramChatId: chat_id }, JWT_SECRET, { expiresIn: "1h" });
 
-    const newTempUser = await TemporaryCompany.create({
+    const newTempUser = await TempComp.create({
       buid, // Generated new buid
       token, // Generated JWT token
       telegramChatId: chat_id
