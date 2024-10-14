@@ -19,8 +19,6 @@ app.use(express.json());
 // CORS Configuration
 const corsOptions = {
   origin: process.env.ALLOWED_ORIGIN || '*',  // Allow specific origin or use '*' to allow all origins
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],  // Allowed HTTP methods
-  allowedHeaders: ['Content-Type', 'Authorization'],  // Allowed headers
 };
 
 // Use CORS middleware
