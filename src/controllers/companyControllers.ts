@@ -212,11 +212,11 @@ const updateTelegramAuth = async (
     res: Response
   ): Promise<Response> => {
     try {
-      const { build } = req.body;  // Receive 'build' from request body
+      const { buid } = req.body;  // Receive 'buid' from request body
       const { telegramAuthCallbackUrl } = req.body;
     
       // Validate the required fields
-      if (!build || !telegramAuthCallbackUrl) {
+      if (!buid || !telegramAuthCallbackUrl) {
         return res.status(400).json({ message: "Missing required fields" });
       }
   
@@ -226,9 +226,9 @@ const updateTelegramAuth = async (
       // Construct the full telegram auth URL
       const xuperTelegramAuthUrl = `https://xuperplay.pages.dev/customer/telegram_auth/${alphanumericCode}`;
       
-      // Find the project using 'build' and update it
+      // Find the project using 'buid' and update it
       const updatedProject = await CompanyModel.findOneAndUpdate(
-        { build }, // Search by 'build' instead of '_id'
+        { buid }, // Search by 'buid' instead of '_id'
         {
           telegramAuthStatus: true, 
           telegramAuthCallbackUrl, 
@@ -238,7 +238,7 @@ const updateTelegramAuth = async (
       );
     
       if (!updatedProject) {
-        return res.status(404).json({ message: "Project with the given build not found"  });
+        return res.status(404).json({ message: "Project with the given buid not found"  });
       }
     
       return res.json({
