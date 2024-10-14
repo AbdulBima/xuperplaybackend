@@ -5,6 +5,14 @@ import jwt from "jsonwebtoken";
 import TempComp from "../models/tempcomp.model";
 
 const JWT_SECRET = process.env.JWT_SECRET || "your_jwt_secret"; // Replace with your secret
+const generateAlphanumericCode = (): string => {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+    for (let i = 0; i < 6; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+  };
 
 // Create a new project
 const createProject = async (req: Request, res: Response): Promise<Response> => {
@@ -200,33 +208,48 @@ const deleteProject = async (
 
 // Update Telegram authentication details
 const updateTelegramAuth = async (
-  req: Request,
-  res: Response
-): Promise<Response> => {
-  try {
-    const { id } = req.params;
-    const { telegramAuth, telegramAuthStatus, telegramAuthCallbackUrl } =
-      req.body;
-
-    const updatedProject = await CompanyModel.findByIdAndUpdate(
-      id,
-      { telegramAuth, telegramAuthStatus, telegramAuthCallbackUrl },
-      { new: true }
-    );
-
-    if (!updatedProject) {
-      return res.status(404).json({ message: "Project not found" });
+    req: Request,
+    res: Response
+  ): Promise<Response> => {
+    try {
+      const { build } = req.body;  // Receive 'build' from request body
+      const { telegramAuthCallbackUrl } = req.body;
+    
+      // Validate the required fields
+      if (!build || !telegramAuthCallbackUrl) {
+        return res.status(400).json({ message: "Missing required fields" });
+      }
+  
+      // Generate 6 alphanumeric code for the URL
+      const alphanumericCode = generateAlphanumericCode();
+  
+      // Construct the full telegram auth URL
+      const xuperTelegramAuthUrl = `https://xuperplay.pages.dev/customer/telegram_auth/${alphanumericCode}`;
+      
+      // Find the project using 'build' and update it
+      const updatedProject = await CompanyModel.findOneAndUpdate(
+        { build }, // Search by 'build' instead of '_id'
+        {
+          telegramAuthStatus: true, 
+          telegramAuthCallbackUrl, 
+          telegramCode: alphanumericCode
+        },
+        { new: true } // Return the updated document
+      );
+    
+      if (!updatedProject) {
+        return res.status(404).json({ message: "Project with the given build not found"  });
+      }
+    
+      return res.json({
+        message: "Telegram authentication updated successfully",
+        auth_url: xuperTelegramAuthUrl
+      });
+    } catch (error) {
+      console.error("Error updating Telegram auth details:", error);
+      return res.status(500).json({ message: "Internal server error" });
     }
-
-    return res.json({
-      message: "Telegram authentication updated successfully",
-      project: updatedProject,
-    });
-  } catch (error) {
-    console.error("Error updating Telegram auth details:", error);
-    return res.status(500).json({ message: "Internal server error" });
-  }
-};
+  };
 
 const resgiterWithTelegram = async (req: Request, res: Response): Promise<Response> => {
   try {

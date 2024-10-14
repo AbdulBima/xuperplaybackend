@@ -5,7 +5,7 @@ interface ICompany extends Document {
   firstName: string;
   lastName: string;
   buid: string;
-  telegramAuth: string;
+  telegramCode: string;
   telegramAuthStatus: boolean;
   telegramAuthCallbackUrl: string;
   teamSize: number;
@@ -20,7 +20,7 @@ const companySchema = new Schema<ICompany>(
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },
     buid: { type: String, required: true },
-    telegramAuth: { type: String, default: "" }, // Default to empty string
+    telegramCode: { type: String, default: "",  }, // Default to empty string
     telegramAuthStatus: { type: Boolean, default: false }, // Default to false
     telegramAuthCallbackUrl: { type: String, default: "" }, // Default to empty string
     teamSize: { type: Number, default: 1 }, // Default to 1
